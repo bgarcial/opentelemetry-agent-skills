@@ -9,13 +9,28 @@
 
 ## Harness results (required for new or substantively changed skills)
 
-<!-- A/B comparison proving the skill helps, per CONTRIBUTING.md:
-     - Prompt(s) used
-     - Model + harness (e.g. Claude Code X.Y with claude-opus-N)
-     - Baseline run (without the skill): what it got wrong, outdated, or wasteful
-     - Skill run (same prompt, same model): what improved
-     - Links to transcripts (gist is fine)
-     Delete this section for changes that don't touch skill content. -->
+<!-- Delete this whole section for changes that don't touch skill content,
+     and say why (e.g. "Not applicable — no skill content changed").
+     See CONTRIBUTING.md, "Proving the skill helps". -->
+
+**Model + harness:** <!-- e.g. Claude Code X.Y driving claude-opus-N -->
+**Prompt(s) used:** <!-- the representative prompts, or a link to them -->
+
+| Arm | Target-skill revision / state | Cases × reps | Pass | Fail | Unknown |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Target skill withheld | `Withheld` | | | | |
+| Current `origin/main` skill | `<full SHA>` or `Not present` | | | | |
+| Proposed PR skill | `<full SHA>` or `Not present` | | | | |
+
+<!-- Every arm needs results. `Not present` / `Not run` go in the revision cell, with a
+     reason. See CONTRIBUTING.md for what must be held identical across arms. -->
+
+**What differed:** <!-- where the withheld arm was wrong, outdated, or wasteful; what the
+skill fixed; and whether the proposed arm regressed anything against `origin/main` -->
+
+**Failing or unknown runs kept, and why:**
+
+**Transcripts:** <!-- links; a gist is fine -->
 
 ## Checklist
 
@@ -24,6 +39,6 @@
 - [ ] `./bin/check-skill-inventory.py` passes
 - [ ] Skill registered in all three places (skill directory, `.claude-plugin/marketplace.json`, `README.md` table + tree) — if adding/renaming a skill
 - [ ] Content is vendor-neutral, non-opinionated, DRY, and token-efficient
-- [ ] Harness comparison results included above — if skill content changed
+- [ ] All three harness arms reported above, with any `Not run` arm given a reason — if skill content changed
 - [ ] Commit messages follow Conventional Commits
 - [ ] I have signed (or will sign via the CLA bot on this PR) the [OllyGarden CLA](https://github.com/ollygarden/.github/blob/main/CLA.md)

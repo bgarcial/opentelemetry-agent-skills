@@ -36,10 +36,9 @@ Two rules specific to this repository, because they are what makes a skill here 
 
 Any change that can alter when a skill triggers, or what an agent retrieves, recommends, or generates, needs harness evidence. A skill that does not measurably help is context-window cost with no benefit.
 
-The bar is set in [`CONTRIBUTING.md`](../CONTRIBUTING.md#proving-the-skill-helps-harness-results): the same representative prompt(s), same model, same harness, run in fresh sessions **without** and **with** the skill, summarized in the PR description with transcript links. Two things worth doing beyond the written minimum, both learned the hard way:
+The bar is set in [`CONTRIBUTING.md`](../CONTRIBUTING.md#proving-the-skill-helps-harness-results): the same representative prompt(s), cases, repetitions, model, harness, grading rules, and tool access, run in fresh sessions across **three arms** — target skill withheld, current `origin/main` skill, and the proposed PR skill — reported in the PR template's table with transcript links.
 
-- **Run each prompt more than once.** A single run cannot distinguish a real improvement from a lucky sample.
-- **Preserve genuine misses.** Never retry a failing run until it passes, and never report a designed-but-unrun case as passing.
+Editing an existing skill is the case that makes the third arm non-optional. "Withheld vs mine" can look like a clear win while the change has quietly broken something the shipping version already did; only `origin/main` vs proposed can see that. For a brand-new skill that arm names no revision (`Not present`) and is the same configuration as the withheld arm, so it needs no extra runs — but it still reports results.
 
 If a change genuinely cannot alter agent behavior, say `Not applicable — no harness comparison required` in the PR and why.
 
