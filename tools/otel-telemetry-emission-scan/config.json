@@ -127,6 +127,10 @@
       "path": "receiver/icmpcheckreceiver"
     },
     {
+      "repo": "open-telemetry/opentelemetry-collector-contrib",
+      "path": "exporter/prometheusremotewriteexporter"
+    },
+    {
       "repo": "open-telemetry/opentelemetry-go-contrib",
       "path": "instrumentation/github.com/gin-gonic/gin/otelgin"
     },

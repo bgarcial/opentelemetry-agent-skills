@@ -14,6 +14,12 @@
 | opentelemetry-collector-contrib/connector/spanmetricsconnector/v0.156.0.md | v0.156.0 | 2026-08-11 |
 | opentelemetry-collector-contrib/connector/spanmetricsconnector/v0.157.0.md | v0.157.0 | 2026-08-11 |
 | opentelemetry-collector-contrib/connector/spanmetricsconnector/v0.158.0.md | v0.158.0 | 2026-08-11 |
+| opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter/v0.154.0.md | v0.154.0 | 2026-08-28 |
+| opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter/v0.155.0.md | v0.155.0 | 2026-08-28 |
+| opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter/v0.156.0.md | v0.156.0 | 2026-08-28 |
+| opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter/v0.157.0.md | v0.157.0 | 2026-08-28 |
+| opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter/v0.158.0.md | v0.158.0 | 2026-08-28 |
+| opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter/v0.159.0.md | v0.159.0 | 2026-08-28 |
 | opentelemetry-collector-contrib/processor/filterprocessor/v0.153.0.md | v0.153.0 | 2026-08-11 |
 | opentelemetry-collector-contrib/processor/filterprocessor/v0.154.0.md | v0.154.0 | 2026-08-11 |
 | opentelemetry-collector-contrib/processor/filterprocessor/v0.155.0.md | v0.155.0 | 2026-08-11 |
