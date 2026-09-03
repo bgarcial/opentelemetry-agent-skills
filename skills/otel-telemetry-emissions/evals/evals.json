@@ -12,6 +12,15 @@
         "States that written_samples, written_histograms and written_exemplars need Remote Write 2.0 — the exporter.prometheusremotewritexporter.enableSendingRW2 feature gate together with protobuf_message: io.prometheus.write.v2.Request.",
         "Gives correct instrument types and units: consumers is a non-monotonic Sum in {consumer}, wal_lag is a Gauge, wal_read_latency and wal_write_latency are Histograms in ms, and the remaining counters are monotonic Sums."
       ]
+    },
+    {
+      "id": "prometheusremotewrite-written-headers",
+      "prompt": "An operator runs the Collector prometheusremotewriteexporter at v0.159.0 with Remote Write 2.0 enabled. otelcol_exporter_prometheusremotewrite_written_exemplars stays at zero while written_samples increases. Where does each metric get its value, and what would explain the difference? Do not modify files or make network requests.",
+      "expectations": [
+        "Names X-Prometheus-Remote-Write-Exemplars-Written as the response header that written_exemplars is read from.",
+        "Names X-Prometheus-Remote-Write-Samples-Written as the response header that written_samples is read from.",
+        "States that each metric is read from its own header, so a backend that returns Samples-Written but omits Exemplars-Written leaves written_exemplars at zero while written_samples increases."
+      ]
     }
   ]
 }
