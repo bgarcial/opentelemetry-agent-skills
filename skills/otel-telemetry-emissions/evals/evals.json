@@ -15,11 +15,12 @@
     },
     {
       "id": "prometheusremotewrite-written-headers",
-      "prompt": "An operator runs the Collector prometheusremotewriteexporter at v0.159.0 with Remote Write 2.0 enabled. otelcol_exporter_prometheusremotewrite_written_exemplars stays at zero while written_samples increases. Where does each metric get its value, and what would explain the difference? Do not modify files or make network requests.",
+      "prompt": "For the OpenTelemetry Collector prometheusremotewriteexporter at v0.159.0, which response header does each of the three otelcol_exporter_prometheusremotewrite_written_* metrics read its value from? Then say what would explain written_exemplars staying at zero while written_samples increases. Do not modify files or make network requests.",
       "expectations": [
-        "Names X-Prometheus-Remote-Write-Exemplars-Written as the response header that written_exemplars is read from.",
         "Names X-Prometheus-Remote-Write-Samples-Written as the response header that written_samples is read from.",
-        "States that each metric is read from its own header, so a backend that returns Samples-Written but omits Exemplars-Written leaves written_exemplars at zero while written_samples increases."
+        "Names X-Prometheus-Remote-Write-Histograms-Written as the response header that written_histograms is read from.",
+        "Names X-Prometheus-Remote-Write-Exemplars-Written as the response header that written_exemplars is read from.",        
+        "States that each metric is read from its own header, so a backend that returns Samples-Written but omits Exemplars-Written leaves written_exemplars at zero while written_samples increases."      
       ]
     }
   ]
