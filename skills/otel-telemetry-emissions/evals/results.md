@@ -4,10 +4,16 @@ One section per harness run, newest first.
 
 ## PR #242 — written-counts response headers
 
-Run on 2026-09-04 with Claude Code 2.1.259 driving `claude-sonnet-5`. Two cases, three arms,
-three repetitions each: 18 runs. Every repetition used a fresh session, an isolated
-`CLAUDE_CONFIG_DIR`, an empty working directory outside this repository, and the same tool
-access: `Read`, `Glob` and `Grep` only. No arm had network access.
+Run with Claude Code 2.1.259 driving `claude-sonnet-5`. Three cases, three arms, three
+repetitions each: 27 runs. Cases 1 and 2 ran on 2026-09-04. Case 3 was added on 2026-09-05,
+after a maintainer asked this PR to also carry the v0.160.0 file. Every repetition used a
+fresh session, an isolated `CLAUDE_CONFIG_DIR`, an empty working directory outside this
+repository, and the same tool access: `Read`, `Glob` and `Grep` only. No arm had network
+access.
+
+Cases 1 and 2 ran before v0.160.0 was added, so their proposed arm held only v0.154.0 to
+v0.159.0. Those six files are byte-identical in both batches and both cases pin v0.159.0, but
+that arm is not literally the one case 3 ran against. Cases 1 and 2 were not re-run.
 
 Every arm — not only the withheld one — ran inside the same `bwrap` sandbox, which mounted an
 empty `tmpfs` over the checkout of this repository. See "Method corrections" below for why.
@@ -20,9 +26,9 @@ outcome.
 
 | Arm | Target-skill revision / state | Cases × reps | Pass | Fail | Unknown |
 |---|---|---:|---:|---:|---:|
-| Target skill withheld | `Withheld` | 2 × 3 | 2 | 4 | 0 |
-| Current `origin/main` skill | `1bf950f6101e0c66840dce5c873070ff6f47b582` | 2 × 3 | 6 | 0 | 0 |
-| Proposed PR skill | `3c240759d2a67b3497cba0f0dc8d3b615b697d0d` | 2 × 3 | 6 | 0 | 0 |
+| Target skill withheld | `Withheld` | 3 × 3 | 2 | 7 | 0 |
+| Current `origin/main` skill | `1bf950f6101e0c66840dce5c873070ff6f47b582` | 3 × 3 | 6 | 3 | 0 |
+| Proposed PR skill | `995864d7372a09b3257784a554dc58672784b7a9` | 3 × 3 | 9 | 0 | 0 |
 
 ### Per-attempt grading — `prometheusremotewrite-v0159-metrics`
 
@@ -58,11 +64,37 @@ and `D` is the one-header-per-metric consequence for a backend that omits the ex
 | `case2-proposed-2` | pass | pass | pass | pass | pass |
 | `case2-proposed-3` | pass | pass | pass | pass | pass |
 
+### Per-attempt grading — `prometheusremotewrite-version-coverage`
+
+`A` is answering from a source pinned to v0.160.0, `B` is all 16 metric names, `C` is the
+`wal` condition with the `exporter` attribute, and `D` is the Remote Write 2.0 gate together
+with the response header each `written_*` metric reads.
+
+| Attempt | A | B | C | D | Result |
+|---|---|---|---|---|---|
+| `case3-withheld-1` | fail | fail | fail | fail | fail |
+| `case3-withheld-2` | fail | fail | fail | fail | fail |
+| `case3-withheld-3` | fail | fail | fail | fail | fail |
+| `case3-current-1` | fail | pass | pass | fail | fail |
+| `case3-current-2` | fail | pass | pass | fail | fail |
+| `case3-current-3` | fail | pass | pass | fail | fail |
+| `case3-proposed-1` | pass | pass | pass | pass | pass |
+| `case3-proposed-2` | pass | pass | pass | pass | pass |
+| `case3-proposed-3` | pass | pass | pass | pass | pass |
+
 ### What differed
 
-**This is a null result on both cases.** The proposed arm scored the same as the
-`origin/main` arm: 12/12 expectations on case 1 and 12/12 on case 2. On the graded
-expectations, this change does not improve agent output.
+**Case 3 separates the arms.** The proposed skill passed 12 of 12 expectations, `origin/main`
+6 of 12, and the withheld arm 0 of 12. The whole gap is version coverage. `origin/main` has no
+v0.160.0 file, so all three of its runs fell back to v0.159.0 and marked the answer unverified
+— the behaviour `SKILL.md` prescribes when no file matches the target version exactly. The
+behaviour was correct and the data was absent. The proposed skill matched v0.160.0 exactly and
+cited its `commit_sha` in all three runs. The withheld arm answered none of the three, and
+asked for network access rather than reply from recall.
+
+**Cases 1 and 2 are a null result.** The proposed arm scored the same as the `origin/main`
+arm: 12/12 expectations on case 1 and 12/12 on case 2. On those two cases, the header fix does
+not improve agent output.
 
 **Case 2 cannot separate the arms.** Two of the three *withheld* runs named all three headers
 correctly with no skill installed. The model holds these header names in prior knowledge, so a
@@ -80,15 +112,24 @@ the exact per-metric mapping and the third did not mention headers at all. No ru
 proposed skill reproduced the misleading wording, and no run on `origin/main` gave the correct
 per-metric mapping.
 
-That is the effect this PR has: it stops a wrong string from being copied into answers. It does
-not add capability, which is why the graded expectations show parity.
+**The defect reproduced itself in case 3, unprompted.** `case3-current-2` wrote that the
+values are "read from `X-Prometheus-Remote-Write-Samples-Written`-family response headers" —
+the wording this PR removes — in answer to a question that never mentioned headers.
+`case3-current-1` omitted the headers entirely and `case3-current-3` generalised to the
+correct `X-Prometheus-Remote-Write-*-Written` pattern. All three proposed runs gave the exact
+per-metric mapping. Across cases 1 and 3, three of six `origin/main` runs copied the wrong
+string and no proposed run did.
 
-**No regression.** Every case-1 expectation that passed on `origin/main` also passed on the
-proposed skill, in all three repetitions.
+So the two halves of this PR do different work. The header fix stops a wrong string from
+reaching answers, and adds no capability, which is why cases 1 and 2 show parity. The v0.160.0
+file adds coverage, and case 3 measures it.
+
+**No regression.** Every expectation that passed on `origin/main` also passed on the proposed
+skill, in all three repetitions of all three cases.
 
 ### Failing runs kept, and why
 
-All four failures are preserved. None was retried.
+All ten failures are preserved. None was retried.
 
 - `case1-withheld-1`, `case1-withheld-2` and `case1-withheld-3` had no registry to read.
   Rep 1 answered about `target_info` and `otel_scope_info`, which the question did not ask
@@ -96,11 +137,22 @@ All four failures are preserved. None was retried.
   as moderate. All three offered to fetch the upstream source. Genuine misses.
 - `case2-withheld-1` gave the header names with the word order inverted, and passed only the
   fourth expectation.
+- `case3-withheld-1`, `case3-withheld-2` and `case3-withheld-3` declined to answer. Each asked
+  for `WebFetch` or `gh api` access to read the upstream source at the v0.160.0 tag. Run 2
+  reported that it had checked the `otel-collector` skill and found it "verified only against
+  v0.159.0", documenting configuration rather than the exporter's own self-observability
+  metrics. Genuine misses, and evidence that no other skill in this repository carries the
+  data.
+- `case3-current-1`, `case3-current-2` and `case3-current-3` failed the version expectation
+  because `origin/main` has no v0.160.0 file. Each fell back to v0.159.0 and said so, which is
+  what `SKILL.md` instructs. The runs are graded as failures against the case, not as faults
+  in the shipping skill.
 
 ### Method corrections
 
-Two earlier batches of 18 runs were discarded. Both are preserved outside the repository. They
-are recorded here because they changed the method, not because they changed a score.
+Two earlier batches of 18 runs, and one batch of three, were discarded. All are preserved
+outside the repository. They are recorded here because they changed the method, not because
+they changed a score.
 
 1. **The first batch leaked.** The withheld arm removed the skill from its config directory,
    but the repository still sat on disk and `Read` accepts absolute paths. One run globbed `/`,
@@ -119,14 +171,30 @@ are recorded here because they changed the method, not because they changed a sc
    and produced the null result above. The instrument was changed once, for a stated reason;
    no case was re-run in the hope of a better number.
 
-A third method fix applied to the final batch: the skill's own `evals/` directory was removed
+3. **The case-3 proposed arm was rebuilt.** Its first batch ran against an arm copied from the
+   working tree, which also held 28 data files that are not part of this pull request —
+   other components' inventories that are untracked locally. The `origin/main` arm came from a
+   clean worktree and held none of them, so the two arms differed by more than the target
+   change. The arm was rebuilt from commit `995864d7372a09b3257784a554dc58672784b7a9` with
+   `git archive`, checked against that commit with `diff -r` and found identical, and the three
+   proposed runs were repeated. The grade did not change: 12/12 before and after. The discarded
+   outputs are preserved outside the repository. One wording difference is worth recording —
+   the discarded batch held a run that wrote "All 14 metrics" in a closing note while its own
+   table listed all 16 correctly; no run in the clean batch did.
+
+A further method fix applied to the final batch: the skill's own `evals/` directory was removed
 from all three arms. The proposed arm's copy carried the expected header names inside its
 expectations while the `origin/main` copy did not, so leaving it in place would have graded the
 proposed arm against its own answer key.
 
 ### Limitations
 
-- Two cases, three repetitions per arm. This is the minimum `CONTRIBUTING.md` asks for.
+- Three cases, three repetitions per arm. Three repetitions is the minimum `CONTRIBUTING.md`
+  asks for.
+- The proposed arm that cases 1 and 2 ran against was overwritten while case 3 was being set
+  up, so its exact file composition can no longer be checked. The case-3 arm is verified
+  against commit `995864d7372a09b3257784a554dc58672784b7a9`; the cases 1-2 arm is not, and it
+  is stated here rather than assumed to have been clean.
 - One model and one harness. The result may differ on another model.
 - `claude -p` prints the final answer only. The saved output holds no tool calls and no
   reasoning, so a reviewer sees what the agent concluded, not how it got there. The leak in the
@@ -134,15 +202,15 @@ proposed arm against its own answer key.
 - All 170 other skills were present in every arm. The set was identical across arms, so it
   cannot explain a difference between them — but it does explain case 2's original failure,
   since `otel-collector` also covers this component.
-- Case 1 tests one component at one version. It does not test the other five versions this PR
-  corrects.
+- The cases test one component at two versions, v0.159.0 and v0.160.0. They do not test the
+  other five version files this PR corrects.
 - The strongest observation in this report — the wording propagating from the data file into
   answers — is not covered by any expectation. Adding one to case 1 would penalise a correct
   answer for omitting something the prompt never requested.
 
 ### Transcripts
 
-The 18 final answers hold no credentials, no local paths, no customer data and no private
+The 27 final answers hold no credentials, no local paths, no customer data and no private
 repository content. They were checked for all four before this summary was written.
 
 ## PR #235 — prometheusremotewriteexporter inventory
