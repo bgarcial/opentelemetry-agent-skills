@@ -22,6 +22,16 @@
         "Names X-Prometheus-Remote-Write-Exemplars-Written as the response header that written_exemplars is read from.",        
         "States that each metric is read from its own header, so a backend that returns Samples-Written but omits Exemplars-Written leaves written_exemplars at zero while written_samples increases."      
       ]
+    },
+    {
+      "id": "prometheusremotewrite-version-coverage",
+      "prompt": "Which metrics does the OpenTelemetry Collector prometheusremotewriteexporter emit at v0.160.0? For each metric give the name, instrument type, unit, and attributes, and say which metrics are emitted only under a condition. State the exact version your answer is verified against. Do not modify files or contact an endpoint.",
+      "expectations": [
+        "Answers from a source pinned to v0.160.0 and states that v0.160.0 is the verified version, rather than answering from v0.159.0 or a lower version and marking the result unverified.",
+        "Names all 16 metrics under the otelcol_exporter_prometheusremotewrite_ prefix: consumers, failed_translations, sent_batches, translated_time_series, the nine wal_* metrics, and written_exemplars, written_histograms and written_samples.",
+        "States that the nine wal_* metrics are emitted only when the wal config block is set, and carry the exporter attribute at v0.160.0.",
+        "States that written_samples, written_histograms and written_exemplars need Remote Write 2.0 — the exporter.prometheusremotewritexporter.enableSendingRW2 feature gate together with protobuf_message: io.prometheus.write.v2.Request — and that each one is read from its own X-Prometheus-Remote-Write-*-Written response header."
+      ]
     }
   ]
 }
